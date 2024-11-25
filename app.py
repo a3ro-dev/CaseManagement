@@ -132,8 +132,9 @@ def logout():
         del st.session_state['remember_me']
     # Clear cookies on logout
     cookies['remember_me'] = 'False'
-    cookies.delete('username')
-    cookies.delete('role')
+    # Replace cookies.delete() with del statement
+    del cookies['username']
+    del cookies['role']
     cookies.save()
     st.rerun()
 
@@ -141,7 +142,7 @@ def admin_dashboard(username):
     st.markdown("""
         <div style='text-align: center; margin-bottom: 2rem;'>
             <h1>Welcome Vijay</h1>
-            <img src='assets/admin_icon.png' width='50' style='margin: 1rem 0;'>
+            <img src='assets/admin.png' width='50' style='margin: 1rem 0;'>
         </div>
     """, unsafe_allow_html=True)
     
@@ -173,11 +174,11 @@ def admin_dashboard(username):
         manage_backups()
 
 def staff_dashboard():
-    # Update welcome message with icon
-    st.markdown("""
+    # Update welcome message to display the staff user's name
+    st.markdown(f"""
         <div style='text-align: center;'>
-            <h1>Welcome Vijay</h1>
-            <img src='assets/staff_icon.png' width='50'>
+            <h1>Welcome {st.session_state['username'].title()}</h1>
+            <img src='assets/staff.png' width='50'>
         </div>
         """, unsafe_allow_html=True)
     st.header("Case List")
@@ -221,17 +222,18 @@ def manage_database():
 def view_cases():
     st.header("Case Management")
     
+    # Callback function to clear the search box
+    def clear_search_callback():
+        st.session_state.search_box = ""
+    
     # Search interface
     col1, col2 = st.columns([3, 1])
     with col1:
         search_query = st.text_input("Search across all fields...", key="search_box")
     with col2:
         st.markdown("<br>", unsafe_allow_html=True)  # Spacing for alignment
-        clear_search = st.button("Clear Search")
-        if clear_search:
-            st.session_state.search_box = ""
-            st.rerun()
-
+        clear_search = st.button("Clear Search", on_click=clear_search_callback)
+    
     # Display search results or all cases
     if search_query:
         cases = asyncio.run(db.search_all_fields(search_query))
@@ -445,6 +447,61 @@ st.markdown("""
             padding: 1rem 0.5rem;
         }
     }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Update CSS styles
+st.markdown("""
+    <style>
+    /* ...existing styles... */
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .main {
+            padding: 0.5rem !important;
+        }
+        .block-container {
+            padding: 1rem 0.5rem !important;
+        }
+        /* Adjust font sizes for mobile */
+        h1 {
+            font-size: 2rem;
+        }
+        h2 {
+            font-size: 1.5rem;
+        }
+        h3 {
+            font-size: 1.2rem;
+        }
+        /* Adjust button sizes */
+        .stButton > button {
+            padding: 0.5rem 1rem;
+        }
+    }
+
+    /* Add visual effects */
+    body {
+        scroll-behavior: smooth;
+        background-color: #f5f5f5;
+    }
+    .stButton > button:hover {
+        background-color: #555555;
+        transition: background-color 0.3s ease;
+    }
+    h1, h2, h3 {
+        animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Optimize performance */
+    /* Minimize CSS reflows by grouping selectors */
+    .main, .block-container, .stButton > button, h1, h2, h3 {
+        will-change: auto;
+    }
+
     </style>
     """, unsafe_allow_html=True)
 
