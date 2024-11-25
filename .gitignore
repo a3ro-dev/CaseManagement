@@ -164,3 +164,4 @@ cython_debug/
 
 test.py
 db/data.db
+logs/logs.txt
